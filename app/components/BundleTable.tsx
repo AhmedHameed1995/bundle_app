@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "@remix-run/react";
 import {
   Badge,
@@ -6,6 +7,7 @@ import {
   IndexTable,
   Text,
   Tooltip,
+  ButtonProps,
 } from "@shopify/polaris";
 
 // Define enums to match what would be in Prisma
@@ -57,7 +59,6 @@ export function BundleTable({ bundles, onEdit }: BundleTableProps) {
         id={id}
         key={id}
         position={index}
-        onClick={() => onEdit(id)}
       >
         <IndexTable.Cell>
           <Text variant="bodyMd" fontWeight="bold" as="span">
@@ -86,29 +87,26 @@ export function BundleTable({ bundles, onEdit }: BundleTableProps) {
         </IndexTable.Cell>
         <IndexTable.Cell>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Tooltip content="Edit bundle">
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="tertiary"
-                  size="slim"
-                  onClick={() => onEdit(id)}
-                >
-                  Edit
-                </Button>
-              </div>
-            </Tooltip>
-            <Tooltip content="View in Shopify">
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="tertiary"
-                  size="slim"
-                  url={`https://admin.shopify.com/products/${id}`}
-                  external
-                >
-                  View
-                </Button>
-              </div>
-            </Tooltip>
+            <form action={`/app/bundles/${id}`} method="get">
+              <input type="hidden" name="mode" value="edit" />
+              <Button
+                variant="tertiary"
+                size="slim"
+                submit
+              >
+                Edit
+              </Button>
+            </form>
+            
+            <form action={`/app/bundles/${id}`} method="get">
+              <Button
+                variant="tertiary"
+                size="slim"
+                submit
+              >
+                View
+              </Button>
+            </form>
           </div>
         </IndexTable.Cell>
       </IndexTable.Row>

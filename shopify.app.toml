@@ -3,7 +3,7 @@
 client_id = "146865c0b65e11418a78207cf2fb8e89"
 name = "bundle_app"
 handle = "bundle_app-6"
-application_url = "https://rural-costs-analyze-populations.trycloudflare.com"
+application_url = "https://detector-quiz-penalty-suffer.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://rural-costs-analyze-populations.trycloudflare.com/auth/callback",
-  "https://rural-costs-analyze-populations.trycloudflare.com/auth/shopify/callback",
-  "https://rural-costs-analyze-populations.trycloudflare.com/api/auth/callback"
+  "https://detector-quiz-penalty-suffer.trycloudflare.com/auth/callback",
+  "https://detector-quiz-penalty-suffer.trycloudflare.com/auth/shopify/callback",
+  "https://detector-quiz-penalty-suffer.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

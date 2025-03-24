@@ -9,7 +9,7 @@ generator client {
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -29,4 +29,36 @@ model Session {
   locale        String?
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
+}
+
+// Bundle and BundleItem models
+model Bundle {
+  id        String       @id @default(uuid())
+  shop      String
+  title     String
+  type      BundleType
+  productId String
+  status    BundleStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  items     BundleItem[]
+}
+
+model BundleItem {
+  id        String   @id @default(uuid())
+  bundleId  String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bundle    Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+}
+
+enum BundleType {
+  SIMPLE
+  INFINITE_OPTIONS
+}
+
+enum BundleStatus {
+  DRAFT
+  ACTIVE
 }

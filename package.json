@@ -4,6 +4,10 @@
   "scripts": {
     "build": "remix vite:build",
     "dev": "shopify app dev",
+    "dev:noprisma": "cross-env SKIP_PRISMA_GENERATE=true shopify app dev",
+    "dev:safe": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" shopify app dev",
+    "fresh": "rimraf node_modules/.vite node_modules/.cache build && npm run dev",
+    "rebuild:prisma": "prisma db push --force-reset && prisma generate",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
@@ -37,6 +41,7 @@
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "rimraf": "^5.0.10",
     "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
@@ -47,6 +52,7 @@
     "@types/node": "^22.2.0",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
+    "cross-env": "^7.0.3",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^10.0.1",
     "prettier": "^3.2.4",

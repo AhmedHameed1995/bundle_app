@@ -153,10 +153,10 @@ export default function Index() {
                   <Link url="/app/bundles" monochrome removeUnderline>
                     ➡️ Bundles
                   </Link>
-                  <Link url="https://help.shopify.com" external monochrome removeUnderline>
+                  <Link url="https://help.shopify.com" target="_blank" monochrome removeUnderline>
                     ➡️ Shopify Help Center
                   </Link>
-                  <Link url="https://shopify.dev" external monochrome removeUnderline>
+                  <Link url="https://shopify.dev" target="_blank" monochrome removeUnderline>
                     ➡️ Shopify API Documentation
                   </Link>
                 </BlockStack>

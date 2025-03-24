@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useActionData, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
+import { useActionData, useLoaderData, useNavigation, useSubmit, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -41,37 +41,35 @@ type ActionData =
   | { success: boolean; bundle: any; error?: undefined };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { session, redirect } = await authenticate.admin(request);
 
   try {
-    // Check if the bundle model exists in the database schema
+    // Check if the bundle model exists in the database schema for SQLite
     const bundleTableExists = await db.$queryRaw`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public'
-        AND table_name = 'Bundle'
-      );
-    ` as Array<{exists: boolean}>;
+      SELECT COUNT(*) as exists 
+      FROM sqlite_master 
+      WHERE type='table' AND name='Bundle'
+    ` as Array<{exists: number}>;
     
     let bundles: any[] = [];
-    if (bundleTableExists[0]?.exists) {
+    if (bundleTableExists[0]?.exists > 0) {
       try {
         // Use regular query approach if table exists
         bundles = await db.$queryRaw`
-          SELECT b.* 
-          FROM "Bundle" b
-          WHERE b."shop" = ${session.shop}
+          SELECT * 
+          FROM Bundle
+          WHERE shop = ${session.shop}
         ` as any[];
-        
+
         // Count products for each bundle
         for (const bundle of bundles) {
           try {
             const countResult = await db.$queryRaw`
-              SELECT COUNT(*) as "productCount"
-              FROM "BundleItem" 
-              WHERE "bundleId" = ${bundle.id}
+              SELECT COUNT(*) as productCount
+              FROM BundleItem 
+              WHERE bundleId = ${bundle.id}
             ` as any[];
-            bundle.productCount = parseInt(countResult[0]?.productCount || '0');
+            bundle.productCount = parseInt(String(countResult[0]?.productCount) || '0');
           } catch (err) {
             console.error("Error counting bundle items:", err);
             bundle.productCount = 0;
@@ -106,11 +104,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session, admin } = await authenticate.admin(request);
+  const { session, admin, redirect } = await authenticate.admin(request);
   
   const formData = await request.formData();
   const action = formData.get("action");
-
+  
   if (action === "create_bundle") {
     const title = formData.get("title") as string;
     const typeStr = formData.get("type") as string;
@@ -161,21 +159,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         
         // Insert directly using SQL to avoid Prisma client type issues
         if (typeStr === BundleType.SIMPLE || typeStr === BundleType.INFINITE_OPTIONS) {
-          // Directly execute SQL with explicit casting to the enum types
+          // SQLite doesn't support type casting like PostgreSQL
           await db.$executeRawUnsafe(`
-            INSERT INTO "Bundle" ("id", "shop", "title", "type", "productId", "status", "createdAt", "updatedAt")
+            INSERT INTO Bundle (id, shop, title, type, productId, status, createdAt, updatedAt)
             VALUES (
               '${bundleId}', 
               '${session.shop}', 
               '${title}', 
-              '${typeStr}'::\"BundleType\", 
+              '${typeStr}', 
               '${productId}', 
-              'ACTIVE'::\"BundleStatus\", 
-              '${now.toISOString()}'::timestamp, 
-              '${now.toISOString()}'::timestamp
+              'ACTIVE', 
+              '${now.toISOString()}', 
+              '${now.toISOString()}'
             )
           `);
-          
+
           return json<ActionData>({ 
             success: true, 
             bundle: {
@@ -198,15 +196,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json<ActionData>({ error: "Failed to create bundle" });
     }
   }
-
+  
   return null;
 };
 
 export default function Bundles() {
-  const { bundles } = useLoaderData<typeof loader>();
+  const { bundles } = useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
   const submit = useSubmit();
+  const navigate = useNavigate();
 
   const [bundleTypeModalOpen, setBundleTypeModalOpen] = useState(false);
   const [createBundleModalOpen, setCreateBundleModalOpen] = useState(false);
@@ -241,8 +240,7 @@ export default function Bundles() {
   );
 
   const handleEditBundle = useCallback((id: string) => {
-    // Implement edit functionality
-    console.log("Edit bundle:", id);
+    window.location.href = `/app/bundles/${id}?mode=edit`;
   }, []);
 
   const handleTabChange = useCallback(
