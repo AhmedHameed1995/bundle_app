@@ -16,11 +16,11 @@ import {
   Tabs,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { authenticate } from "../shopify.server";
-import { BundleTypeModal } from "../components/BundleTypeModal";
-import { CreateBundleModal } from "../components/CreateBundleModal";
-import { BundleTable, BundleItem, BundleType, BundleStatus } from "../components/BundleTable";
-import db from "../db.server";
+import { authenticate } from "../../shopify.server";
+import { BundleTypeModal } from "../../components/BundleTypeModal";
+import { CreateBundleModal } from "../../components/CreateBundleModal";
+import { BundleTable, BundleItem, BundleType, BundleStatus } from "../../components/BundleTable";
+import db from "../../db.server";
 import * as crypto from "crypto";
 
 type LoaderData = {
